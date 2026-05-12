@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QPushButton
+from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QPushButton, QScrollArea, QWidget, QVBoxLayout
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 import random
@@ -29,16 +29,47 @@ SpinTimeStatus = 0 # how far along the randomization animation is (reffer to tot
 gambalabel = QLabel("0", gamewindow)
 gambalabel.setFont(QFont("Arial", 50))
 gambalabel.setAlignment(Qt.AlignCenter)
+gambalabel.move(0,-80)
 gambalabel.resize(gamewindow.width(), gamewindow.height())
 
-moneylabel = QLabel(f"Money : {money}", gamewindow)
-moneylabel.setFont(QFont("Arial", 24))
+moneylabel = QLabel(f"Cash:\n{money} $", gamewindow)
+moneylabel.setFont(QFont("Arial", 20))
+moneylabel.setAlignment(Qt.AlignCenter)
 moneylabel.resize(gamewindow.width(), gamewindow.height())
-moneylabel.move(0, 80)
+moneylabel.move(0,-300)
 
 button = QPushButton("Randomize!", gamewindow)
 button.resize(180, 80)
-button.move(410, 600)
+button.move(410, 450)
+
+
+shopscroller = QScrollArea(gamewindow)
+shopscroller.setWidgetResizable(True)
+shoplabel = QLabel("Shop", gamewindow)
+shoplabel.setFont(QFont("Arial", 40))
+shoplabel.resize(300, 80)
+shoplabel.setAlignment(Qt.AlignCenter)
+shoplabel.setStyleSheet("QLabel { border: 1px solid white}")
+shoplabel.move(700,10)
+
+shopcontainer = QWidget()
+shopcontainer.setStyleSheet("QLabel { border: 1px solid white}")
+layout = QVBoxLayout(shopcontainer)
+upgrade1price = 5
+upgrade1 = QPushButton(f"Memory Upgrade\nprice: {upgrade1price}", shopcontainer)
+layout.addWidget(upgrade1)
+upgrade2 = QPushButton(f"Memory Upgrade2\nprice: {upgrade1price}", shopcontainer)
+layout.addWidget(upgrade2)
+upgrade3 = QPushButton(f"Memory Upgrade2\nprice: {upgrade1price}", shopcontainer)
+layout.addWidget(upgrade3)
+layout.addStretch()
+shopscroller.setWidget(shopcontainer)
+
+scroll_y = shoplabel.y() + shoplabel.height()
+scroll_height = gamewindow.height() - scroll_y  
+
+shopscroller.move(shoplabel.x(), scroll_y)
+shopscroller.resize(shoplabel.width(), scroll_height)
 
 timer = QTimer()
 
@@ -74,8 +105,10 @@ def gamba():
         timer.stop()
         result = getrandom()
         gambalabel.setText(str(result))
+        pulse()
+        pygame.mixer.Sound.play(ticker)
         money += result
-        moneylabel.setText(f"Money : {money}")
+        moneylabel.setText(f"Cash:\n{money} $")
         button.setEnabled(True)
         isSpinning = False
 
