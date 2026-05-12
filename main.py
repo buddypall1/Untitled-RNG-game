@@ -53,7 +53,7 @@ shoplabel.setStyleSheet("QLabel { border: 1px solid white}")
 shoplabel.move(700,10)
 
 shopcontainer = QWidget()
-shopcontainer.setStyleSheet("QLabel { border: 1px solid white}")
+shopcontainer.setStyleSheet("QPushButton { min-height: 60px; }")
 layout = QVBoxLayout(shopcontainer)
 upgrade1price = 5
 upgrade1 = QPushButton(f"Memory Upgrade\nprice: {upgrade1price}", shopcontainer)
