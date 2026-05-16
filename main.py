@@ -1,9 +1,15 @@
 import sys
-from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QPushButton, QScrollArea, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QPushButton, QScrollArea, QWidget, QVBoxLayout, QStackedWidget, QMessageBox
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 import random
 import pygame
+import pickle
+
+saveloc = "data/game_data.dat"
+
+
+
 
 ROLL_CONFIG = {
     "min" : 0, # minimum roll value
@@ -22,7 +28,24 @@ ticker = pygame.mixer.Sound("SFX\metronome.mp3")
 gamewindow = QMainWindow()
 gamewindow.setFixedSize(1000, 800)
 
-money = 0
+def loadData():
+    try:
+        with open(saveloc, 'rb') as file:
+            data = pickle.load(file)
+
+        return data
+    
+    except (FileNotFoundError, EOFError, pickle.UnpicklingError, ImportError, MemoryError):
+        QMessageBox.critical(gamewindow, "Save error", "Data file not found! Reverting to defaults..")
+        return {
+            "Money": 0
+        }
+    
+gamedata = loadData()
+
+
+money = gamedata['Money']
+
 isSpinning = False
 SpinTimeStatus = 0 # how far along the randomization animation is (reffer to totalspins to know how far it needs to go for the spin to be over)
 
@@ -42,34 +65,63 @@ button = QPushButton("Randomize!", gamewindow)
 button.resize(180, 80)
 button.move(410, 450)
 
+###############################
+############ SHOP #############
+###############################
 
 shopscroller = QScrollArea(gamewindow)
 shopscroller.setWidgetResizable(True)
+
 shoplabel = QLabel("Shop", gamewindow)
 shoplabel.setFont(QFont("Arial", 40))
 shoplabel.resize(300, 80)
 shoplabel.setAlignment(Qt.AlignCenter)
 shoplabel.setStyleSheet("QLabel { border: 1px solid white}")
-shoplabel.move(700,10)
+shoplabel.move(700, 10)
 
-shopcontainer = QWidget()
-shopcontainer.setStyleSheet("QPushButton { min-height: 60px; }")
-layout = QVBoxLayout(shopcontainer)
-upgrade1price = 5
-upgrade1 = QPushButton(f"Memory Upgrade\nprice: {upgrade1price}", shopcontainer)
-layout.addWidget(upgrade1)
-upgrade2 = QPushButton(f"Memory Upgrade2\nprice: {upgrade1price}", shopcontainer)
-layout.addWidget(upgrade2)
-upgrade3 = QPushButton(f"Memory Upgrade2\nprice: {upgrade1price}", shopcontainer)
-layout.addWidget(upgrade3)
-layout.addStretch()
-shopscroller.setWidget(shopcontainer)
+page1button = QPushButton("General", gamewindow)
+page1button.resize(shoplabel.width() // 2, 40)
+page1button.move(shoplabel.x(), shoplabel.y() + shoplabel.height())
 
-scroll_y = shoplabel.y() + shoplabel.height()
-scroll_height = gamewindow.height() - scroll_y  
+page2button = QPushButton("Idk", gamewindow)
+page2button.resize(shoplabel.width() // 2, 40)
+page2button.move(shoplabel.x() + shoplabel.width() // 2, shoplabel.y() + shoplabel.height())
+
+shopcontainerstack = QStackedWidget()
+shopcontainerstack.setStyleSheet("QPushButton { min-height: 60px; }")
+
+generalupgrades = QWidget()
+generalupgradeslayout = QVBoxLayout(generalupgrades)
+placeholderupg= QPushButton("TestUpg\nprice: NaN", generalupgrades)
+generalupgradeslayout.addWidget(placeholderupg)
+placeholderupg2 = QPushButton("TestUpg2\nprice: NaN", generalupgrades)
+generalupgradeslayout.addWidget(placeholderupg2)
+generalupgradeslayout.addStretch()
+
+testpage = QWidget()
+testpagelayout = QVBoxLayout(testpage)
+testupgr = QPushButton("Idk\nprice: NaN", testpage)
+testpagelayout.addWidget(testupgr)
+testpagelayout.addStretch()
+
+shopcontainerstack.addWidget(generalupgrades)
+shopcontainerstack.addWidget(testpage)
+shopscroller.setWidget(shopcontainerstack)
+
+page1button.clicked.connect(lambda: shopcontainerstack.setCurrentIndex(0))
+page2button.clicked.connect(lambda: shopcontainerstack.setCurrentIndex(1))
+
+scroll_y = page1button.y() + page1button.height()
+scroll_height = gamewindow.height() - scroll_y
 
 shopscroller.move(shoplabel.x(), scroll_y)
 shopscroller.resize(shoplabel.width(), scroll_height)
+
+###############################
+########## SHOP END ###########
+###############################
+
+
 
 timer = QTimer()
 
@@ -128,5 +180,21 @@ timer.timeout.connect(gamba)
 button.clicked.connect(spinstart)
 
 gamewindow.show()
+
+
+def on_close(event):
+    savedata()
+    event.accept()
+
+def savedata():
+    global money
+    data = {
+        "Money": money
+    }
+    with open(saveloc, "wb") as file:
+        pickle.dump(data,file)
+
+
+gamewindow.closeEvent = on_close
 
 sys.exit(app.exec())
