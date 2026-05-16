@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QPushButton, QScrollArea, QWidget, QVBoxLayout, QStackedWidget, QMessageBox
+from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QPushButton, QScrollArea, QWidget, QVBoxLayout, QStackedWidget, QMessageBox, QFrame
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 import random
@@ -90,6 +90,7 @@ page2button.move(shoplabel.x() + shoplabel.width() // 2, shoplabel.y() + shoplab
 shopcontainerstack = QStackedWidget()
 shopcontainerstack.setStyleSheet("QPushButton { min-height: 60px; }")
 
+# 1st page of shop
 generalupgrades = QWidget()
 generalupgradeslayout = QVBoxLayout(generalupgrades)
 placeholderupg= QPushButton("TestUpg\nprice: NaN", generalupgrades)
@@ -98,6 +99,7 @@ placeholderupg2 = QPushButton("TestUpg2\nprice: NaN", generalupgrades)
 generalupgradeslayout.addWidget(placeholderupg2)
 generalupgradeslayout.addStretch()
 
+# 2nd page of shop
 testpage = QWidget()
 testpagelayout = QVBoxLayout(testpage)
 testupgr = QPushButton("Idk\nprice: NaN", testpage)
@@ -121,7 +123,23 @@ shopscroller.resize(shoplabel.width(), scroll_height)
 ########## SHOP END ###########
 ###############################
 
+###############################
+############ INFO #############
+###############################
 
+infolabel = QLabel("Info")
+
+info = QFrame(gamewindow)
+info.setFrameShape(QFrame.Shape.StyledPanel)
+info.setFrameShadow(QFrame.Shadow.Sunken)
+info.setStyleSheet("QFrame { background-color: rgb(30, 30, 30); }")
+info.resize(300, 80)
+
+infolayout = QVBoxLayout(info)
+infolayout.addWidget(QLabel("Test", info))
+###############################
+############ INFO #############
+###############################
 
 timer = QTimer()
 
