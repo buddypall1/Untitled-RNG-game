@@ -32,7 +32,7 @@ def loadData():
     try:
         with open(saveloc, 'rb') as file:
             data = pickle.load(file)
-
+            print(ROLL_CONFIG)
         return data
     
     except (FileNotFoundError, EOFError, pickle.UnpicklingError, ImportError, MemoryError):
@@ -47,7 +47,9 @@ gamedata = loadData()
 money = gamedata['Money']
 
 isSpinning = False
+"""If True the spinner is currently spinning, if false user has control."""
 SpinTimeStatus = 0 # how far along the randomization animation is (reffer to totalspins to know how far it needs to go for the spin to be over)
+"""How far along the randomization animation is (refer to totalSpins to know how far it needs to go for the spin to be over)."""
 
 gambalabel = QLabel("0", gamewindow)
 gambalabel.setFont(QFont("Arial", 50))
@@ -56,12 +58,14 @@ gambalabel.move(0,-80)
 gambalabel.resize(gamewindow.width(), gamewindow.height())
 
 moneylabel = QLabel(f"Cash:\n{money} $", gamewindow)
+"""Main money label (shown on top of screen)"""
 moneylabel.setFont(QFont("Arial", 20))
 moneylabel.setAlignment(Qt.AlignCenter)
 moneylabel.resize(gamewindow.width(), gamewindow.height())
 moneylabel.move(0,-300)
 
 button = QPushButton("Randomize!", gamewindow)
+"""Randomizer button. starts the randomization sequence"""
 button.resize(180, 80)
 button.move(410, 450)
 
@@ -155,6 +159,7 @@ def pulse():
 def pulse_reset():
     gambalabel.setStyleSheet("font-size: 50px;") 
 
+
 def gamba():
     global SpinTimeStatus, money, isSpinning
 
@@ -162,14 +167,13 @@ def gamba():
     slowdownstart = ROLL_CONFIG["slowdownstart"]
     ticksintoslowdown = SpinTimeStatus - (ammountofspins - slowdownstart)
 
-    if SpinTimeStatus < ammountofspins:
+    if SpinTimeStatus < ammountofspins -1:
         gambalabel.setText(str(getrandom()))
         pulse()
         pygame.mixer.Sound.play(ticker)
         if ticksintoslowdown > 0:
             newinterval = ROLL_CONFIG["tickinterval"] + ticksintoslowdown * ROLL_CONFIG["slowdownammount"]
             timer.setInterval(newinterval)
-
         SpinTimeStatus += 1
     else:
         timer.stop()
@@ -207,7 +211,8 @@ def on_close(event):
 def savedata():
     global money
     data = {
-        "Money": money
+        "Money": money,
+        "RollConfig" : ROLL_CONFIG
     }
     with open(saveloc, "wb") as file:
         pickle.dump(data,file)
